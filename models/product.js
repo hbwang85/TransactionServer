@@ -28,8 +28,8 @@ Product.prototype.save = function save(callback) {
                 return callback(err);
             }
 
-            collection.ensureIndex('owner', {unique: true});
-            collection.insert(product, {safe:true}, function(err, product){
+            //collection.ensureIndex('owner', {unique: true});
+            collection.insert(product, function(err, product){
                 mongodb.close();
                 callback(err, product);
             });
@@ -50,7 +50,7 @@ Product.get = function get(ownerName, callback) {
             }
 
             if (ownerName) {
-                collection.find({owner:ownerName}, {'_id':false}).toArray(function(err, doc) {
+                collection.find({owner:ownerName}).toArray(function(err, doc) {
                     mongodb.close();
                     if (doc) {
                         var product = new Product(doc);
@@ -58,7 +58,7 @@ Product.get = function get(ownerName, callback) {
                     }
                 });
             } else {
-                collection.find({}, {'_id':false}).toArray(function(err, docs){
+                collection.find({}).toArray(function(err, docs){
                     mongodb.close();
                     if (docs) {
                         callback(null, docs);
