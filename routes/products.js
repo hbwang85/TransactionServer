@@ -8,9 +8,9 @@ var Product = require('../models/product');
 router.get('/', function(req, res){
     Product.get(null, function(err, docs){
         if (!err) {
-            res.send(200, docs);
+            res.status(200).send(docs);
         } else {
-            res.send(500, 'failed to retrieve products');
+            res.status(500).send('failed to retrieve products');
         }
 
     })
@@ -19,15 +19,17 @@ router.get('/', function(req, res){
 router.post('/', function(req, res) {
     var product = new Product({
         owner:req.body.owner,
-        phone:req.body.phone
+        phone:req.body.phone,
+        photokey:req.body.photokey
     });
 
-    //TODO 为什么product就是没有返回值
     product.save(function(err, product) {
         if (!err) {
-            res.send(200, {
-                owner: product.owner,
-                phone: product.phone
+            res.status(200).send({
+
+                owner: product.ops[0].owner,
+                phone: product.ops[0].phone,
+                photourl: product.ops[0].photourl
             });
         } else {
             res.send(500, 'failed to save to db');

@@ -3,10 +3,13 @@
  */
 
 var mongodb = require('./db');
+var domain = '7xlenv.com1.z0.glb.clouddn.com';
+var qiniu = require('qiniu');
 
 function Product(product) {
     this.owner = product.owner;
-    this.phone = product.phone
+    this.phone = product.phone;
+    this.photourl = downloadUrl(domain, product.photokey);
 }
 
 module.exports = Product;
@@ -14,7 +17,8 @@ module.exports = Product;
 Product.prototype.save = function save(callback) {
     var product = {
         owner: this.owner,
-        phone: this.phone
+        phone: this.phone,
+        photourl: this.photourl
     };
 
     mongodb.open(function (err, db) {
@@ -22,18 +26,29 @@ Product.prototype.save = function save(callback) {
             return callback(err);
         }
 
-        db.collection('products', function(err, collection) {
+        //db.collection('products', function(err, collection) {
+        //    if (err) {
+        //        mongodb.close();
+        //        return callback(err);
+        //    }
+        //
+        //    //collection.ensureIndex('owner', {unique: true});
+        //    collection.insert(product, function(err, product){
+        //        mongodb.close();
+        //        callback(err, product);
+        //    });
+        //});
+
+        db.collection('products').insertOne(product, function(err, inserted){
             if (err) {
-                mongodb.close();
-                return callback(err);
+                db.close(true, callback(err));
+            } else {
+                db.close(true, callback(err, inserted));
             }
 
-            //collection.ensureIndex('owner', {unique: true});
-            collection.insert(product, function(err, product){
-                mongodb.close();
-                callback(err, product);
-            });
         });
+
+
     });
 };
 
@@ -70,3 +85,9 @@ Product.get = function get(ownerName, callback) {
     });
 };
 
+
+function downloadUrl(domain, key) {
+    var baseUrl = qiniu.rs.makeBaseUrl(domain, key);
+    var policy = new qiniu.rs.GetPolicy();
+    return policy.makeRequest(baseUrl);
+}
