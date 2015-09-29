@@ -6,7 +6,7 @@ var router = express.Router();
 var Product = require('../models/product');
 
 router.get('/', function(req, res){
-    Product.get(null, function(err, docs){
+    Product.get(function(err, docs){
         if (!err) {
             res.status(200).send(docs);
         } else {
